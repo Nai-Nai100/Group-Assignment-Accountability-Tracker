@@ -133,11 +133,11 @@ US-02, US-09, US-10; RC-02, RC-04, RC-08, RC-12; DD-02; OQ-01 (extraction method
 
 - Skill profile screen and API for current strengths and skills the member wants to practice, available to every member including the team lead.
 
-- Lead-only upload of the assignment prompt and course syllabus, with the third-party AI disclosure shown directly above the extract button before upload (RC-08).
+- Lead-only upload of the assignment prompt and course syllabus, plus an optional professor-notes text box, with the third-party AI disclosure (covering documents and notes) shown directly above the extract button before upload (RC-08).
 
 - File storage for uploaded documents, with only metadata and references kept in MongoDB (pending OQ-05).
 
-- Server-side objective extraction that writes candidate objectives marked as unreviewed; the AI service key never reaches the client.
+- Server-side objective extraction from the document text and any professor notes, writing candidate objectives marked as unreviewed; the AI service key never reaches the client.
 
 - Objective review screen where the lead can edit, add and remove objectives, with a visible difference between the unreviewed draft and the accepted list.
 
@@ -147,7 +147,9 @@ US-02, US-09, US-10; RC-02, RC-04, RC-08, RC-12; DD-02; OQ-01 (extraction method
 
 - Both documents are stored against the project and the system returns an extracted objective list for review (US-09).
 
-- Course documents are visible only to members of the uploading project (RC-08, RC-03).
+- Course documents and professor notes are visible only to members of the uploading project (RC-08, RC-03).
+
+- Professor notes, when entered, are saved with the project and included in the extraction request; extraction still works when they are empty.
 
 - The lead's edited objective list is saved, and only the accepted list, never the raw extraction, is exposed to allocation (US-10, RC-04).
 

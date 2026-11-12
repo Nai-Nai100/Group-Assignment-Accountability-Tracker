@@ -69,6 +69,7 @@ A member who opens a lead-only screen sees a short message naming the project's 
 - Extracted objectives are always a **draft** first. They are never used for allocation until the lead reviews and accepts them (RC-04).
 - The UI must make the draft vs accepted difference visible.
 - Teams do not type objectives from scratch as the starting point; they come from the instructor's documents (DD-02). The lead may correct, add and remove.
+- The lead may add optional **professor notes** on the upload screen: anything the instructor said that is not in the documents. The notes are extraction input only, read together with the documents; they never replace the documents and never skip the draft review (RC-04).
 
 **Allocation**
 - Allocation balances existing strengths against learning needs; neither side may be dropped (DD-01).
@@ -94,8 +95,9 @@ A member who opens a lead-only screen sees a short message naming the project's 
 
 - **Project isolation:** a user sees only data from projects they belong to (RC-03).
 - **Course documents may be instructor-owned material.** They are visible only to the uploading team, never shared across teams, and used for nothing except objective extraction for that project (RC-08).
-- **Disclose before upload:** if a third-party AI service does the extraction, the upload screen must say so above the extract button, before the user uploads (RC-08, frame A6b).
-- **Send the minimum:** only course document text goes to the AI service; never names, profiles, progress or evidence.
+- **Professor notes are treated like course documents:** visible only to that project's team and used only for that project's objective extraction.
+- **Disclose before upload:** if a third-party AI service does the extraction, the upload screen must say so above the extract button, before the user uploads, and the disclosure must name both the documents and the professor notes (RC-08, frame A6b).
+- **Send the minimum:** only course document text and the lead's professor notes go to the AI service; never names, profiles, progress or evidence.
 - **Credentials:** passwords stored only as salted hashes; secrets never in client code or the repo (RC-01, RC-12).
 
 ## 6. Ethical boundaries

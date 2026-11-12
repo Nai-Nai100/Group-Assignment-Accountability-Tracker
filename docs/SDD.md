@@ -139,7 +139,8 @@ US-09 - Upload Assignment and Syllabus
 User Story: As a team lead, I can upload the assignment prompt and the course syllabus so that the system knows
 what the project requires and what it is meant to teach.
 Pass/Fail Check: Pass if both documents are stored against the project and the system returns a list of extracted
-learning objectives for review.
+learning objectives for review. The lead may also enter optional professor notes (anything the instructor said
+that is not in the documents), which are used together with the documents for extraction.
 US-10 - Review Extracted Learning Objectives
 User Story: As a team lead, I can review, correct, add, and remove the extracted learning objectives so that
 allocation is based on what the course actually requires.
@@ -198,7 +199,8 @@ submitted evidence. This protects the record from the disputes the system exists
 RC-08 - Privacy of Uploaded Course Documents: Assignment prompts and syllabi are uploaded by students and
 may be instructor-owned material. They are visible only to members of the uploading team and are never shared
 across teams or used for any purpose other than objective extraction for that project. If a third-party AI service
-performs the extraction, that transfer must be disclosed in the interface before upload.
+performs the extraction, that transfer must be disclosed in the interface before upload. The lead's optional
+professor notes receive the same protection and are named in the same disclosure.
 RC-09 - Accessibility & User Experience: The interface targets WCAG 2.1 AA: sufficient color contrast, keyboard
 operability for all primary flows, labeled form controls, and status conveyed by a symbol and text rather than color
 alone. Both the light and dark themes must meet the contrast requirement independently. Allocation reasons and
@@ -271,7 +273,7 @@ Figure 1 shows the system architecture. The browser client communicates with the
 using a REST API; it never contacts the database, the object store, or the AI service directly. Three flows carry most
 of the system's meaning.
 Document intake and extraction. The lead uploads the assignment and syllabus. The server stores the files in
-object storage, sends the extracted text to the language-model API, and writes the returned candidate objectives
+object storage, sends the extracted text and any professor notes to the language-model API, and writes the returned candidate objectives
 to the database marked as unreviewed. The lead's review turns them into the accepted objective list (RC-04).
 Allocation. The server reads the accepted objectives together with every member's skill profile and the project's
 milestones, computes a proposed set of tasks with assignees and reasons, and returns it to the lead for

@@ -37,7 +37,7 @@ A responsive web app (no native mobile) built as a conventional three-tier syste
 | **API** (`/server`, Express) | Authentication, all authorization, validation, allocation, extraction orchestration, file upload/download brokering, the notification job | Trust role or project IDs sent by the client without checking membership |
 | **Database** (MongoDB Atlas) | Users, projects, memberships, objectives, milestones, tasks, progress updates, posts, file metadata | Store file bytes, plaintext passwords or API keys |
 | **File storage** | Uploaded course documents and evidence files | Be publicly readable; downloads go through the API or short-lived signed URLs |
-| **Language-model API** | Turning uploaded document text into a *draft* objective list | Be called from the client; receive anything other than that project's course document text |
+| **Language-model API** | Turning uploaded document text (plus the lead's optional professor notes) into a *draft* objective list | Be called from the client; receive anything other than that project's course document text and professor notes |
 
 Suggested repo layout (agents may refine, not replace): `/client`, `/server/src/{routes,middleware,models,services,jobs}`, `/docs`, root `.env.example`.
 
@@ -52,6 +52,7 @@ Role is stored on **Membership**, not on User (DD-05). One user can be lead on o
 | `memberships` | userId, projectId, role (`lead`/`member`) | One per user per project. The source of truth for access. |
 | `profiles` | userId, projectId, strengths[], wantToPractice[] | Lead has one too. |
 | `courseDocuments` | projectId, kind (`assignment`/`syllabus`), storageRef, uploadedBy | Metadata only. |
+| `projects.profNote` | text, updatedBy, updatedAt | Optional professor notes for extraction. Same privacy as course documents (RC-08). |
 | `objectives` | projectId, text, status (`draft`/`accepted`) | Allocation reads `accepted` only (RC-04). |
 | `milestones` | projectId, title, dueDate | ≥ 2 per project allowed. |
 | `allocations` | projectId, status (`proposed`/`accepted`), acceptedBy, acceptedAt | Only one accepted allocation is active. |
@@ -63,7 +64,7 @@ Role is stored on **Membership**, not on User (DD-05). One user can be lead on o
 
 ## 4. Key flows
 
-1. **Document intake & extraction:** lead uploads → API stores file in storage → API sends text to the language-model API → candidate objectives saved as `draft` → lead edits and accepts → status becomes `accepted`.
+1. **Document intake & extraction:** lead uploads (and optionally adds professor notes) → API stores file in storage → API sends document text + professor notes to the language-model API → candidate objectives saved as `draft` → lead edits and accepts → status becomes `accepted`.
 2. **Allocation:** API reads accepted objectives + every member's profile + milestones → proposes tasks with assignee, basis and reason → stored as `proposed` → lead reassigns and accepts → tasks become active. Nothing is assigned before acceptance (RC-06).
 3. **Progress:** member updates own task status with evidence → API stamps author and server time → visible to whole team.
 4. **Notification:** server scheduler runs daily → finds milestones exactly 3 days ahead → notifies members with incomplete tasks on them. Never triggered by client activity (RC-11).
@@ -113,3 +114,4 @@ When an Issue hits one of these, stop and leave a comment for the human owner. R
 | 2026-10 | Role stored per project on Membership | DD-05 |
 | 2026-10 | Join code instead of emailed invite link | DD-08 |
 | 2026-11 | Joining by code creates the user's account (email + bcrypt password) if they don't have one | Human review of Issue #14 |
+| 2026-11 | Optional professor-notes text box on the upload screen; notes go to extraction with the documents and are covered by the RC-08 disclosure | Human UI review (frame A6/A6b) |
