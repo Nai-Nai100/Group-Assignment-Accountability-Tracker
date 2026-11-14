@@ -10,16 +10,18 @@ export default function App() {
       .catch(() => setApiStatus('down'));
   }, []);
 
-  const label = {
-    checking: '… Checking API connection',
-    ok: '✓ API connected',
-    down: '✕ API not reachable',
+  const [symbol, text] = {
+    checking: ['…', 'Checking API connection'],
+    ok: ['✓', 'API connected'],
+    down: ['✕', 'API not reachable'],
   }[apiStatus];
 
   return (
     <main>
       <h1>Group Project Accountability Tracker</h1>
-      <p role="status">{label}</p>
+      <p role="status">
+        <span aria-hidden="true">{symbol}</span> {text}
+      </p>
     </main>
   );
 }
