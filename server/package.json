@@ -1,0 +1,16 @@
+{
+  "name": "server",
+  "private": true,
+  "scripts": {
+    "start": "node --env-file-if-exists=../.env src/index.js",
+    "dev": "node --watch --env-file-if-exists=../.env src/index.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  }
+}
