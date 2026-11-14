@@ -4,7 +4,7 @@ A responsive web app for student group projects: a React client (`/client`) and 
 
 ## Requirements
 
-- Node.js 22 or later (the API uses Node's built-in `.env` loading)
+- Node.js 22.9 or later (the API uses Node's built-in `--env-file-if-exists` loading)
 - A MongoDB Atlas connection string, a JWT secret and a Gemini API key
 
 ## Setup
