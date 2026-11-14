@@ -100,9 +100,9 @@ These are not optional and apply to every Issue.
 
 | ID | Question | Affects |
 |---|---|---|
-| OQ-01 | Language-model API vs rules-based objective extraction | Extraction service; RC-08 disclosure text |
+| OQ-01 | ~~Language-model API vs rules-based objective extraction~~ **Decided 2026-11, see Section 8** | Extraction service; RC-08 disclosure text |
 | OQ-04 | In-app only vs email notifications | Notification job; adds mail dependency if email |
-| OQ-05 | Object storage vs storing files in MongoDB | Upload, evidence and file-space Issues |
+| OQ-05 | ~~Object storage vs storing files in MongoDB~~ **Decided 2026-11, see Section 8** | Upload, evidence and file-space Issues |
 
 When an Issue hits one of these, stop and leave a comment for the human owner. Record each decision here as it is made.
 
@@ -115,3 +115,5 @@ When an Issue hits one of these, stop and leave a comment for the human owner. R
 | 2026-10 | Join code instead of emailed invite link | DD-08 |
 | 2026-11 | Joining by code creates the user's account (email + bcrypt password) if they don't have one | Human review of Issue #14 |
 | 2026-11 | Optional professor-notes text box on the upload screen; notes go to extraction with the documents and are covered by the RC-08 disclosure | Human UI review (frame A6/A6b) |
+| 2026-11 | OQ-01: objective extraction uses a language-model API, the Gemini API, called server-side only. Key in `GEMINI_API_KEY` | Human decision, Issue #9 |
+| 2026-11 | OQ-05: uploaded files are stored in MongoDB using GridFS (no separate object storage, so no storage keys) | Human decision, Issue #9 |
