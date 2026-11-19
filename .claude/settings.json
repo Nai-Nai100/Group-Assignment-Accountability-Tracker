@@ -1,12 +1,22 @@
 {
+  "includeCoAuthoredBy": false,
   "permissions": {
-    "deny": ["Read(./.env)", "Edit(./.env)", "Write(./.env)"]
+    "deny": [
+      "Read(./.env)",
+      "Edit(./.env)",
+      "Write(./.env)"
+    ]
   },
   "hooks": {
     "PreToolUse": [
       {
         "matcher": "Bash|Read|Edit|Write",
-        "hooks": [{ "type": "command", "command": "node .claude/hooks/guard.js" }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/guard.js"
+          }
+        ]
       }
     ]
   }
