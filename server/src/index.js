@@ -1,5 +1,6 @@
 const { loadConfig } = require('./config');
 const { createApp } = require('./app');
+const { connectDb } = require('./db');
 
 let config;
 try {
@@ -9,4 +10,9 @@ try {
   process.exit(1);
 }
 
-createApp().listen(config.port, () => console.log(`API listening on port ${config.port}`));
+connectDb(config.mongodbUri)
+  .then(() => createApp().listen(config.port, () => console.log(`API listening on port ${config.port}`)))
+  .catch((err) => {
+    console.error(`Could not connect to MongoDB: ${err.message}`);
+    process.exit(1);
+  });

@@ -117,3 +117,4 @@ When an Issue hits one of these, stop and leave a comment for the human owner. R
 | 2026-11 | Optional professor-notes text box on the upload screen; notes go to extraction with the documents and are covered by the RC-08 disclosure | Human UI review (frame A6/A6b) |
 | 2026-11 | OQ-01: objective extraction uses a language-model API, the Gemini API, called server-side only. Key in `GEMINI_API_KEY` | Human decision, Issue #9 |
 | 2026-11 | OQ-05: uploaded files are stored in MongoDB using GridFS (no separate object storage, so no storage keys) | Human decision, Issue #9 |
+| 2026-11 | Mongoose is the MongoDB ODM; server tests use `mongodb-memory-server` (dev only) and never touch Atlas. Stored role values are `lead` / `member`; the UI shows the friendly labels. Membership has a unique index on (userId, projectId) | Human decision, Issue #10 |
