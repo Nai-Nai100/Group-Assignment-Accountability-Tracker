@@ -14,7 +14,7 @@ membershipSchema.index({ userId: 1, projectId: 1 }, { unique: true });
 
 // Lists the user's projects with the role held on each (US-14).
 membershipSchema.statics.listUserProjects = async function listUserProjects(userId) {
-  const memberships = await this.find({ userId }).populate('projectId').lean();
+  const memberships = await this.find({ userId }).populate('projectId', 'name createdBy').lean();
   return memberships
     .filter((m) => m.projectId)
     .map((m) => ({ project: m.projectId, role: m.role }));
