@@ -11,7 +11,7 @@ try {
 }
 
 connectDb(config.mongodbUri)
-  .then(() => createApp().listen(config.port, () => console.log(`API listening on port ${config.port}`)))
+  .then(() => createApp(config).listen(config.port, () => console.log(`API listening on port ${config.port}`)))
   .catch((err) => {
     console.error(`Could not connect to MongoDB: ${err.message}`);
     process.exit(1);
