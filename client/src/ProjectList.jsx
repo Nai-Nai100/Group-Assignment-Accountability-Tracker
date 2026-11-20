@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const ROLE_LABELS = { lead: 'Team lead', member: 'Team member' };
 
@@ -6,6 +6,10 @@ const ROLE_LABELS = { lead: 'Team lead', member: 'Team member' };
 export default function ProjectList({ token, onSignOut }) {
   const [projects, setProjects] = useState(null);
   const [error, setError] = useState('');
+  const headingRef = useRef(null);
+
+  // Move focus here after sign-in, so it doesn't fall back to <body>.
+  useEffect(() => headingRef.current.focus(), []);
 
   useEffect(() => {
     fetch('/api/projects', { headers: { Authorization: `Bearer ${token}` } })
@@ -19,7 +23,9 @@ export default function ProjectList({ token, onSignOut }) {
 
   return (
     <main>
-      <h1>Your projects</h1>
+      <h1 ref={headingRef} tabIndex={-1}>
+        Your projects
+      </h1>
       {error && (
         <p role="alert" className="error">
           Error: {error}

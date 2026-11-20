@@ -6,9 +6,9 @@
   --text: #24272b;
   --muted: #555b61;
   --border: #c3c9ce;
-  --input-border: #9ea6ad;
+  --input-border: #7a8289;
   --accent: #4aa9aa;
-  --accent-border: #2f8a8b;
+  --accent-border: #2a7d7e;
   --accent-text: #24272b;
   --error-bg: oklch(0.96 0.02 25);
   --error-border: oklch(0.75 0.08 25);
@@ -24,7 +24,7 @@
     --text: #e6e8ea;
     --muted: #a3aab1;
     --border: #3c434a;
-    --input-border: #59626b;
+    --input-border: #6f7983;
     --accent-text: #14171a;
     --error-bg: oklch(0.24 0.02 25);
     --error-border: oklch(0.45 0.08 25);
@@ -121,6 +121,11 @@ button {
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .error {

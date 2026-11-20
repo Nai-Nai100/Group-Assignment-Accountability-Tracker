@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // Frames A1/B1. Email and password only; there is no public sign-up (RC-01).
 export default function SignIn({ onSignedIn }) {
@@ -6,6 +6,10 @@ export default function SignIn({ onSignedIn }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const headingRef = useRef(null);
+
+  // Move focus here when the view appears (e.g. after sign-out), so it doesn't fall back to <body>.
+  useEffect(() => headingRef.current.focus(), []);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -34,7 +38,9 @@ export default function SignIn({ onSignedIn }) {
     <main className="signin">
       <div className="signin-inner">
         <div className="eyebrow">Group Project</div>
-        <h1>Accountability Tracker</h1>
+        <h1 ref={headingRef} tabIndex={-1}>
+          Accountability Tracker
+        </h1>
         <form className="card" onSubmit={handleSubmit}>
           <h2>Sign in</h2>
           <label>
@@ -65,7 +71,7 @@ export default function SignIn({ onSignedIn }) {
             </p>
           )}
           <button type="submit" disabled={busy}>
-            Sign in
+            {busy ? 'Signing in…' : 'Sign in'}
           </button>
           <p className="note">There is no public sign-up. Team members join with a code from their team lead.</p>
         </form>
