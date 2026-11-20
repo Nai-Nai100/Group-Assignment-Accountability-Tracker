@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+require('./Project'); // registers the model that listUserProjects populates
 
 // Exactly two per-project roles; there is no global/admin role (DD-05).
 const ROLES = ['lead', 'member'];

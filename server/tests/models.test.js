@@ -100,3 +100,15 @@ describe('Project joinCode', () => {
     await expect(makeProject(user._id, { joinCode: 'ABC123' })).rejects.toMatchObject({ code: 11000 });
   });
 });
+
+// Regression: the running server loads Membership without ever loading Project directly,
+// so listUserProjects' populate failed with a 500. Check in a fresh process with nothing else loaded.
+test('loading Membership alone registers the Project model it populates', () => {
+  const { spawnSync } = require('child_process');
+  const r = spawnSync(
+    process.execPath,
+    ['-e', "require('./src/models/Membership'); console.log(require('mongoose').modelNames().join(','))"],
+    { cwd: require('path').join(__dirname, '..'), encoding: 'utf8' },
+  );
+  expect(r.stdout).toContain('Project');
+});
