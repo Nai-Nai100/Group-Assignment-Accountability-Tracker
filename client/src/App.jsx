@@ -1,27 +1,37 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import SignIn from './SignIn.jsx';
+import ProjectList from './ProjectList.jsx';
 
-// Placeholder page: confirms the client can reach the API over REST.
+const TOKEN_KEY = 'token';
+
+function readToken() {
+  try {
+    return sessionStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeToken(token) {
+  try {
+    if (token) sessionStorage.setItem(TOKEN_KEY, token);
+    else sessionStorage.removeItem(TOKEN_KEY);
+  } catch {
+    // Storage unavailable: the session lasts until the page is closed.
+  }
+}
+
 export default function App() {
-  const [apiStatus, setApiStatus] = useState('checking');
+  const [token, setToken] = useState(readToken);
 
-  useEffect(() => {
-    fetch('/api/health')
-      .then((res) => setApiStatus(res.ok ? 'ok' : 'down'))
-      .catch(() => setApiStatus('down'));
+  const signIn = useCallback((t) => {
+    writeToken(t);
+    setToken(t);
+  }, []);
+  const signOut = useCallback(() => {
+    writeToken(null);
+    setToken(null);
   }, []);
 
-  const [symbol, text] = {
-    checking: ['…', 'Checking API connection'],
-    ok: ['✓', 'API connected'],
-    down: ['✕', 'API not reachable'],
-  }[apiStatus];
-
-  return (
-    <main>
-      <h1>Group Project Accountability Tracker</h1>
-      <p role="status">
-        <span aria-hidden="true">{symbol}</span> {text}
-      </p>
-    </main>
-  );
+  return token ? <ProjectList token={token} onSignOut={signOut} /> : <SignIn onSignedIn={signIn} />;
 }

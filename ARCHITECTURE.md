@@ -118,3 +118,4 @@ When an Issue hits one of these, stop and leave a comment for the human owner. R
 | 2026-11 | OQ-01: objective extraction uses a language-model API, the Gemini API, called server-side only. Key in `GEMINI_API_KEY` | Human decision, Issue #9 |
 | 2026-11 | OQ-05: uploaded files are stored in MongoDB using GridFS (no separate object storage, so no storage keys) | Human decision, Issue #9 |
 | 2026-11 | Mongoose is the MongoDB ODM; server tests use `mongodb-memory-server` (dev only) and never touch Atlas. Stored role values are `lead` / `member`; the UI shows the friendly labels. Membership has a unique index on (userId, projectId) | Human decision, Issue #10 |
+| 2026-11 | JWT sessions expire after 8 hours with no refresh token; the client keeps the token in `sessionStorage`. The token carries only the user ID, never a role | Human decision, Issue #11 |
