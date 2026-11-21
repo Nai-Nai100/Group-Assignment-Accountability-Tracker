@@ -230,3 +230,10 @@ button.secondary {
   margin: 16px 0;
   max-width: 620px;
 }
+
+/* A label, its input and a hint kept outside the label (so the hint isn't part of the input's name). */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

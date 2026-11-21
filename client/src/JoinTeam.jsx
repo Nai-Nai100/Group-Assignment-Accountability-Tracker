@@ -8,6 +8,7 @@ export default function JoinTeam({ onJoined, onBack }) {
   const [busy, setBusy] = useState(false);
   const headingRef = useRef(null);
 
+  // Focus the screen's own heading, so screen readers hear "Join your team" rather than the repeated app name.
   useEffect(() => headingRef.current.focus(), []);
 
   const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
@@ -36,33 +37,39 @@ export default function JoinTeam({ onJoined, onBack }) {
     <main className="signin">
       <div className="signin-inner">
         <div className="eyebrow">Group Project</div>
-        <h1 ref={headingRef} tabIndex={-1}>
-          Accountability Tracker
-        </h1>
+        <h1>Accountability Tracker</h1>
         <form className="card" onSubmit={handleSubmit}>
-          <h2>Join your team</h2>
-          <p className="note">Enter the 6-digit join code your team lead shared with you.</p>
-          <label>
-            Join code
+          <h2 ref={headingRef} tabIndex={-1}>
+            Join your team
+          </h2>
+          <div className="field">
+            <label htmlFor="join-code">Join code</label>
             <input
+              id="join-code"
               required
               inputMode="numeric"
-              autoComplete="one-time-code"
+              autoComplete="off"
               pattern="\d{6}"
+              title="6 digits, for example 123456"
               maxLength={6}
               placeholder="000000"
               className="code-input"
+              aria-describedby="join-code-hint"
               value={form.code}
               onChange={set('code')}
             />
-          </label>
-          <label>
-            Full name
-            <input required maxLength={100} autoComplete="name" value={form.name} onChange={set('name')} />
-          </label>
-          <label>
-            University email
+            <span id="join-code-hint" className="hint">
+              The 6-digit code your team lead shared with you.
+            </span>
+          </div>
+          <div className="field">
+            <label htmlFor="join-name">Full name</label>
+            <input id="join-name" required maxLength={100} autoComplete="name" value={form.name} onChange={set('name')} />
+          </div>
+          <div className="field">
+            <label htmlFor="join-email">University email</label>
             <input
+              id="join-email"
               required
               type="email"
               autoComplete="email"
@@ -74,22 +81,24 @@ export default function JoinTeam({ onJoined, onBack }) {
             <span id="join-email-hint" className="hint">
               You&apos;ll use this to sign in next time.
             </span>
-          </label>
-          <label>
-            Password
+          </div>
+          <div className="field">
+            <label htmlFor="join-password">Password</label>
             <input
+              id="join-password"
               required
               type="password"
               autoComplete="new-password"
+              minLength={8}
               maxLength={72}
               aria-describedby="join-password-hint"
               value={form.password}
               onChange={set('password')}
             />
             <span id="join-password-hint" className="hint">
-              New here? Choose a password of at least 8 characters. Already have an account? Enter your password.
+              At least 8 characters. New here? Choose one. Already have an account? Enter your password.
             </span>
-          </label>
+          </div>
           {error && (
             <p role="alert" className="error">
               Error: {error}

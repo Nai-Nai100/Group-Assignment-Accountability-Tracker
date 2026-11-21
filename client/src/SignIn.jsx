@@ -76,7 +76,7 @@ export default function SignIn({ onSignedIn, onJoin }) {
           <p className="note">There is no public sign-up. Team members join with a code from their team lead.</p>
         </form>
         <button type="button" className="secondary link-button" onClick={onJoin}>
-          Have a join code? Join your team →
+          Have a join code? Join your team <span aria-hidden="true">→</span>
         </button>
       </div>
     </main>

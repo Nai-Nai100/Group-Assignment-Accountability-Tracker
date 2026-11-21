@@ -37,7 +37,7 @@ describe('signed-out join (D7)', () => {
 
   function openJoin() {
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: 'Have a join code? Join your team →' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Have a join code? Join your team' }));
   }
 
   function submitJoin() {
@@ -98,7 +98,7 @@ describe('join from the project list (B2, B4)', () => {
   async function submitCode(code = '482913') {
     render(<App />);
     await screen.findByText(/Transit study/);
-    fireEvent.change(screen.getByLabelText('Join another project with a code'), { target: { value: code } });
+    fireEvent.change(screen.getByLabelText('Join a project with a code'), { target: { value: code } });
     fireEvent.click(screen.getByRole('button', { name: 'Join' }));
   }
 

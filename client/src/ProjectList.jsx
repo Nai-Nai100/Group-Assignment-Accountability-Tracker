@@ -83,20 +83,26 @@ export default function ProjectList({ token, onSignOut, onCreate, onInvite, noti
         </ul>
       )}
       <form className="card join-form" onSubmit={joinByCode}>
-        <label>
-          Join another project with a code
+        <div className="field">
+          <label htmlFor="b2-code">Join a project with a code</label>
           <input
+            id="b2-code"
             required
             inputMode="numeric"
-            autoComplete="one-time-code"
+            autoComplete="off"
             pattern="\d{6}"
+            title="6 digits, for example 123456"
             maxLength={6}
             placeholder="000000"
             className="code-input"
+            aria-describedby="b2-code-hint"
             value={code}
             onChange={(e) => setCode(e.target.value)}
           />
-        </label>
+          <span id="b2-code-hint" className="hint">
+            The 6-digit code your team lead shared with you.
+          </span>
+        </div>
         {joinError && (
           <p role="alert" className="error">
             Error: {joinError}
