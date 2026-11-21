@@ -3,6 +3,7 @@ const { requireAuth } = require('./auth');
 const { requireMember, requireLead } = require('./access');
 const Project = require('./models/Project');
 const Membership = require('./models/Membership');
+const { projectForCode, addMember, alreadyOn, joinedProject } = require('./join');
 
 const optionalText = (v) => v === undefined || v === null || (typeof v === 'string' && v.trim().length <= 100);
 
@@ -37,6 +38,18 @@ function projectsRouter(jwtSecret) {
       res.status(201).json({
         project: { id: project._id, name: project.name, course: project.course, role: 'lead', joinCode: project.joinCode },
       });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // Join another project with a code while signed in (frames B2, B4; US-15). Always as a team member.
+  router.post('/join', auth, async (req, res, next) => {
+    try {
+      const project = await projectForCode(req, res, [`ip:${req.ip}`, `user:${req.userId}`]);
+      if (!project) return;
+      if (!(await addMember(req.userId, project._id))) return res.status(409).json({ error: alreadyOn(project) });
+      res.status(201).json({ project: joinedProject(project) });
     } catch (err) {
       next(err);
     }
