@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 // Frames A1/B1. Email and password only; there is no public sign-up (RC-01).
-export default function SignIn({ onSignedIn }) {
+export default function SignIn({ onSignedIn, onJoin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -75,6 +75,9 @@ export default function SignIn({ onSignedIn }) {
           </button>
           <p className="note">There is no public sign-up. Team members join with a code from their team lead.</p>
         </form>
+        <button type="button" className="secondary link-button" onClick={onJoin}>
+          Have a join code? Join your team <span aria-hidden="true">→</span>
+        </button>
       </div>
     </main>
   );
