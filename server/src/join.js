@@ -7,23 +7,23 @@ const WRONG_CODE = "That join code doesn't match a project. Check it with your t
 const TOO_MANY = 'Too many attempts. Try again later.';
 
 // Finds the project for req.body.code, or sends the error response and returns null.
-// A wrong code counts against the guess limit for every key given.
+// A wrong code counts against the guess limit for every key given (see attempts.js).
 async function projectForCode(req, res, keys) {
   const { code } = req.body || {};
   if (typeof code !== 'string' || !CODE.test(code)) {
     res.status(400).json({ error: 'Enter the 6-digit join code.' });
     return null;
   }
-  if (attempts.blocked(keys)) {
+  if (!attempts.begin(keys)) {
     res.status(429).json({ error: TOO_MANY });
     return null;
   }
   const project = await Project.findOne({ joinCode: code });
   if (!project) {
-    attempts.fail(keys);
-    res.status(400).json({ error: WRONG_CODE });
+    res.status(400).json({ error: WRONG_CODE }); // the attempt stays counted
     return null;
   }
+  attempts.refund(keys);
   return project;
 }
 
@@ -42,4 +42,4 @@ async function addMember(userId, projectId) {
 const alreadyOn = (project) => `You're already on ${project.name}.`;
 const joinedProject = (project) => ({ id: project._id, name: project.name, role: 'member' });
 
-module.exports = { projectForCode, addMember, alreadyOn, joinedProject };
+module.exports = { TOO_MANY, projectForCode, addMember, alreadyOn, joinedProject };

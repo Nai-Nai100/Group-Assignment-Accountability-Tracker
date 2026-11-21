@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('./models/User');
 const attempts = require('./attempts');
-const { projectForCode, addMember, alreadyOn, joinedProject } = require('./join');
+const { TOO_MANY, projectForCode, addMember, alreadyOn, joinedProject } = require('./join');
 
 const TOKEN_TTL = '8h';
 const INVALID = 'Email or password is incorrect.';
@@ -25,7 +25,7 @@ function requireAuth(jwtSecret) {
 }
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MIN_PASSWORD = 8; // for new accounts only
+const MIN_PASSWORD = 8; // for every D7 join (#14 decision)
 const isPassword = (p) => typeof p === 'string' && p.length > 0 && Buffer.byteLength(p) <= 72; // bcrypt's input limit
 
 // POST /api/auth/signin, and POST /api/auth/join (join a project by code, frame D7).
@@ -63,7 +63,10 @@ function authRouter(jwtSecret) {
       if (typeof email !== 'string' || !EMAIL.test(email.trim())) {
         return res.status(400).json({ error: 'Enter a valid email.' });
       }
-      if (!isPassword(password)) return res.status(400).json({ error: 'Enter a password.' });
+      // Checked before any lookup for every D7 join, so the response can't reveal whether an email has an account.
+      if (!isPassword(password) || password.length < MIN_PASSWORD) {
+        return res.status(400).json({ error: `Enter a password of at least ${MIN_PASSWORD} characters.` });
+      }
 
       const keys = [`ip:${req.ip}`];
       const project = await projectForCode(req, res, keys);
@@ -72,15 +75,11 @@ function authRouter(jwtSecret) {
       let user = await User.findOne({ email: email.trim().toLowerCase() });
       let created = false;
       if (user) {
-        // Never add someone's account to a project without their password.
-        if (!(await bcrypt.compare(password, user.passwordHash))) {
-          attempts.fail(keys);
-          return res.status(401).json({ error: INVALID });
-        }
+        // Never add someone's account to a project without their password. A wrong one stays counted.
+        if (!attempts.begin(keys)) return res.status(429).json({ error: TOO_MANY });
+        if (!(await bcrypt.compare(password, user.passwordHash))) return res.status(401).json({ error: INVALID });
+        attempts.refund(keys);
       } else {
-        if (password.length < MIN_PASSWORD) {
-          return res.status(400).json({ error: `Choose a password of at least ${MIN_PASSWORD} characters.` });
-        }
         user = await User.create({ name, email, passwordHash: await bcrypt.hash(password, 10) });
         created = true;
       }

@@ -267,3 +267,37 @@ describe('POST /api/auth/join (signed out)', () => {
     expect(await User.countDocuments({ email: NEW.email })).toBe(0);
   });
 });
+
+describe('policy-review fixes (#14)', () => {
+  test('a burst of wrong codes sent at the same time gets at most 5 guesses', async () => {
+    const results = await Promise.all(
+      Array.from({ length: 12 }, () => join({ code: '999999' }, bearer(priya))),
+    );
+    const statuses = results.map((r) => r.status);
+    expect(statuses.filter((s) => s === 400)).toHaveLength(attempts.LIMIT);
+    expect(statuses.filter((s) => s === 429)).toHaveLength(12 - attempts.LIMIT);
+  });
+
+  test('a burst of wrong passwords for an existing email gets at most 5 guesses', async () => {
+    const body = { code: '111111', name: 'Priya', email: 'priya@university.edu', password: 'wrong-password' };
+    const results = await Promise.all(Array.from({ length: 8 }, () => joinSignedOut(body)));
+    expect(results.filter((r) => r.status === 401)).toHaveLength(attempts.LIMIT);
+    expect(results.filter((r) => r.status === 429)).toHaveLength(8 - attempts.LIMIT);
+  });
+
+  test('successful joins do not use up the limit', async () => {
+    for (const code of ['111111', '222222']) expect((await join({ code }, bearer(priya))).status).toBe(201);
+    await Project.create({ name: 'C', createdBy: omar._id, joinCode: '333333' });
+    for (let i = 0; i < attempts.LIMIT - 1; i += 1) await join({ code: '999999' }, bearer(priya));
+    expect((await join({ code: '333333' }, bearer(priya))).status).toBe(201);
+  });
+
+  test('a short password gets the same 400 for a known and an unknown email, before any lookup', async () => {
+    const known = await joinSignedOut({ code: '111111', name: 'Priya', email: 'priya@university.edu', password: 'short7!' });
+    const unknown = await joinSignedOut({ ...NEW, code: '111111', password: 'short7!' });
+    expect(known.status).toBe(400);
+    expect(unknown.status).toBe(400);
+    expect(known.body).toEqual(unknown.body);
+    expect(await Membership.countDocuments({ userId: priya._id })).toBe(0);
+  });
+});
