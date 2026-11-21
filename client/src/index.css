@@ -205,3 +205,28 @@ button.secondary {
   font-weight: 500;
   letter-spacing: 0.3em;
 }
+
+/* Frames B2/D7: join by code. */
+.hint {
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.link-button {
+  width: 100%;
+  margin-top: 12px;
+  text-align: left;
+}
+
+.code-input {
+  max-width: 220px;
+  font-family: ui-monospace, 'IBM Plex Mono', Menlo, Consolas, monospace;
+  font-size: 20px;
+  letter-spacing: 0.3em;
+}
+
+.join-form {
+  margin: 16px 0;
+  max-width: 620px;
+}

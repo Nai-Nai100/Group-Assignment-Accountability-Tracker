@@ -3,6 +3,7 @@ import SignIn from './SignIn.jsx';
 import ProjectList from './ProjectList.jsx';
 import CreateProject from './CreateProject.jsx';
 import Invite from './Invite.jsx';
+import JoinTeam from './JoinTeam.jsx';
 
 const TOKEN_KEY = 'token';
 
@@ -35,7 +36,8 @@ export default function App() {
     setToken(null);
   }, []);
 
-  // Which signed-in screen is showing: the project list, A3 create, or A4 invite for one project.
+  // Which screen is showing. Signed out: sign-in, or D7 'join'. Signed in: the project list
+  // (with an optional notice), A3 'new', or A4 'invite' for one project.
   const [view, setView] = useState({ name: 'projects' });
   const showProjects = useCallback(() => setView({ name: 'projects' }), []);
   const signOutToStart = useCallback(() => {
@@ -43,7 +45,18 @@ export default function App() {
     signOut();
   }, [signOut]);
 
-  if (!token) return <SignIn onSignedIn={signIn} />;
+  if (!token && view.name === 'join') {
+    return (
+      <JoinTeam
+        onJoined={(t, notice) => {
+          setView({ name: 'projects', notice });
+          signIn(t);
+        }}
+        onBack={showProjects}
+      />
+    );
+  }
+  if (!token) return <SignIn onSignedIn={signIn} onJoin={() => setView({ name: 'join' })} />;
   if (view.name === 'new') {
     return (
       <CreateProject
@@ -63,6 +76,7 @@ export default function App() {
       onSignOut={signOutToStart}
       onCreate={() => setView({ name: 'new' })}
       onInvite={(project) => setView({ name: 'invite', project })}
+      notice={view.notice}
     />
   );
 }
