@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 const ROLE_LABELS = { lead: 'Team lead', member: 'Team member' };
 
 // Minimal landing page after sign-in (US-01). The full project list is built in TMP-07.
-export default function ProjectList({ token, onSignOut }) {
+export default function ProjectList({ token, onSignOut, onCreate, onInvite }) {
   const [projects, setProjects] = useState(null);
   const [error, setError] = useState('');
   const headingRef = useRef(null);
@@ -37,14 +37,24 @@ export default function ProjectList({ token, onSignOut }) {
         <ul>
           {projects.map((p) => (
             <li key={p.id}>
-              {p.name} — {ROLE_LABELS[p.role]}
+              {p.name} — {ROLE_LABELS[p.role]}{' '}
+              {p.role === 'lead' && (
+                <button type="button" className="secondary" onClick={() => onInvite(p)} aria-label={`Invite team members to ${p.name}`}>
+                  Invite team members
+                </button>
+              )}
             </li>
           ))}
         </ul>
       )}
-      <button type="button" onClick={onSignOut}>
-        Sign out
-      </button>
+      <div className="actions">
+        <button type="button" onClick={onCreate}>
+          Create a project
+        </button>
+        <button type="button" className="secondary" onClick={onSignOut}>
+          Sign out
+        </button>
+      </div>
     </main>
   );
 }
