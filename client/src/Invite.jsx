@@ -22,12 +22,15 @@ export default function Invite({ token, project, onBack, onSignOut }) {
       .catch((err) => setError(err.message));
   }, [token, project.id, onSignOut]);
 
+  // Alternating a trailing no-break space changes the text, so a repeat press is announced again.
+  const announce = (msg) => setCopied((prev) => (prev === msg ? `${msg} ` : msg));
+
   async function copyCode() {
     try {
       await navigator.clipboard.writeText(code);
-      setCopied('Join code copied.');
+      announce('Join code copied.');
     } catch {
-      setCopied('Could not copy. Select the code and copy it yourself.');
+      announce('Could not copy. Select the code and copy it yourself.');
     }
   }
 
@@ -51,7 +54,11 @@ export default function Invite({ token, project, onBack, onSignOut }) {
         <div className="card code-card">
           <div>
             <div className="eyebrow">Team join code</div>
-            <p className="join-code">{code}</p>
+            <p className="join-code">
+              <span aria-hidden="true">{code}</span>
+              {/* Spaced so screen readers say each digit instead of one large number. */}
+              <span className="sr-only">{code.split('').join(' ')}</span>
+            </p>
           </div>
           <button type="button" className="secondary" onClick={copyCode}>
             Copy code
