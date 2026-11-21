@@ -1,25 +1,8 @@
-const crypto = require('crypto');
 const express = require('express');
 const { requireAuth } = require('./auth');
 const { requireMember, requireLead } = require('./access');
 const Project = require('./models/Project');
 const Membership = require('./models/Membership');
-
-// 6 random digits (frames A4, B3). Not guessable from other codes; TMP-06 must also limit wrong guesses (#13).
-const newJoinCode = () => String(crypto.randomInt(0, 1000000)).padStart(6, '0');
-const isDuplicateCode = (err) => err.code === 11000 && err.keyPattern && err.keyPattern.joinCode;
-
-// Saves the project with a fresh join code, retrying if the code is already taken.
-async function saveWithJoinCode(project) {
-  for (let attempt = 0; ; attempt += 1) {
-    project.joinCode = newJoinCode();
-    try {
-      return await project.save();
-    } catch (err) {
-      if (!isDuplicateCode(err) || attempt >= 4) throw err;
-    }
-  }
-}
 
 const optionalText = (v) => v === undefined || v === null || (typeof v === 'string' && v.trim().length <= 100);
 
@@ -44,9 +27,7 @@ function projectsRouter(jwtSecret) {
       if (typeof name !== 'string' || !name.trim() || name.trim().length > 100 || !optionalText(course)) {
         return res.status(400).json({ error: 'Enter a project name of up to 100 characters.' });
       }
-      const project = await saveWithJoinCode(
-        new Project({ name, course: course ? course : undefined, createdBy: req.userId }),
-      );
+      const project = await new Project({ name, course: course?.trim() || undefined, createdBy: req.userId }).saveWithJoinCode();
       try {
         await Membership.create({ userId: req.userId, projectId: project._id, role: 'lead' });
       } catch (err) {
@@ -64,10 +45,9 @@ function projectsRouter(jwtSecret) {
   // The project's join code, for its team lead only (frame A4).
   router.get('/:projectId/join-code', auth, requireMember, requireLead, async (req, res, next) => {
     try {
-      let project = await Project.findById(req.projectId);
+      const project = await Project.findById(req.projectId);
       if (!project) return res.status(404).json({ error: 'Not found.' });
-      if (!project.joinCode) project = await saveWithJoinCode(project); // projects made before codes existed
-      res.json({ joinCode: project.joinCode });
+      res.json({ joinCode: project.joinCode || null });
     } catch (err) {
       next(err);
     }

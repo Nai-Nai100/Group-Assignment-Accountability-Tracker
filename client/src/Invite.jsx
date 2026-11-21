@@ -15,7 +15,9 @@ export default function Invite({ token, project, onBack, onSignOut }) {
         if (res.status === 401) return onSignOut();
         if (res.status === 403) throw new Error('Only the team lead can see the join code.');
         if (!res.ok) throw new Error('Could not load the join code.');
-        setCode((await res.json()).joinCode);
+        const { joinCode } = await res.json();
+        if (!joinCode) throw new Error('This project has no join code.');
+        setCode(joinCode);
       })
       .catch((err) => setError(err.message));
   }, [token, project.id, onSignOut]);
