@@ -6,7 +6,7 @@
   --text: #24272b;
   --muted: #555b61;
   --border: #c3c9ce;
-  --input-border: #7a8289;
+  --input-border: #6f7983;
   --accent: #4aa9aa;
   --accent-border: #2a7d7e;
   --accent-text: #24272b;
@@ -142,4 +142,66 @@ button:disabled {
   margin: 0;
   font-size: 14px;
   color: var(--muted);
+}
+
+/* Example text in inputs must meet 4.5:1 too. */
+::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+/* Read by screen readers only. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Frames A3/A4: page heading, secondary buttons, join code. */
+.page h1 {
+  font-family: Georgia, serif;
+  font-size: 30px;
+  line-height: 1.2;
+  margin: 4px 0 8px;
+}
+
+.page > .note {
+  max-width: 62ch;
+  margin-bottom: 20px;
+}
+
+.narrow {
+  max-width: 620px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+button.secondary {
+  background: var(--surface);
+  border-color: var(--input-border);
+  color: var(--text);
+  font-weight: 500;
+}
+
+.code-card {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.join-code {
+  margin: 4px 0 0;
+  font-family: ui-monospace, 'IBM Plex Mono', Menlo, Consolas, monospace;
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
 }

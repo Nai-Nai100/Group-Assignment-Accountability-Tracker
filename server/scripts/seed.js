@@ -35,6 +35,7 @@ async function seed() {
       { name: p.name, createdBy: ids[p.lead] },
       { upsert: true, new: true },
     );
+    if (!project.joinCode) await project.saveWithJoinCode();
     for (const [email, role] of [[p.lead, 'lead'], [p.member, 'member']]) {
       await Membership.updateOne(
         { userId: ids[email], projectId: project._id },

@@ -1,6 +1,6 @@
 const express = require('express');
-const { requireAuth, authRouter } = require('./auth');
-const Membership = require('./models/Membership');
+const { authRouter } = require('./auth');
+const { projectsRouter } = require('./projects');
 
 function createApp({ jwtSecret } = {}) {
   const app = express();
@@ -8,16 +8,7 @@ function createApp({ jwtSecret } = {}) {
 
   app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
   app.use('/api/auth', authRouter(jwtSecret));
-
-  // The signed-in user's projects with the role held on each (US-01, US-14).
-  app.get('/api/projects', requireAuth(jwtSecret), async (req, res, next) => {
-    try {
-      const list = await Membership.listUserProjects(req.userId);
-      res.json({ projects: list.map(({ project, role }) => ({ id: project._id, name: project.name, role })) });
-    } catch (err) {
-      next(err);
-    }
-  });
+  app.use('/api/projects', projectsRouter(jwtSecret));
 
   app.use((req, res) => res.status(404).json({ error: 'Not found.' }));
   // Never echo the request body or error details, so passwords can't leak into responses or logs.
