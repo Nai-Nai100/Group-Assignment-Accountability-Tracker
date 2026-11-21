@@ -30,6 +30,16 @@ The client calls the API through `/api` (Vite forwards it to port 5000 in develo
 
 Check the API: `GET http://localhost:5000/api/health` returns `{"status":"ok"}`.
 
+### Demo users (dev only)
+
+There is no public sign-up. To get accounts you can sign in with, set `SEED_PASSWORD` in `.env`, then run:
+
+```sh
+cd server && npm run seed
+```
+
+This creates `maya@example.edu` (lead on "Transit study", member on "Energy report") and `priya@example.edu` (the reverse), both with the `SEED_PASSWORD` password. It is safe to run more than once. It writes to the database in `MONGODB_URI`, so never run it against real user data.
+
 ## Test
 
 ```sh
