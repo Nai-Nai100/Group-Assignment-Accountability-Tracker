@@ -9,11 +9,12 @@ export default function Refused({ title, project }) {
   return (
     <main className="page">
       <div className="eyebrow">Project setup · team lead only</div>
-      <h1 ref={headingRef} tabIndex={-1}>
+      {/* The refusal describes the heading, so screen readers read it as soon as focus lands. */}
+      <h1 ref={headingRef} tabIndex={-1} aria-describedby="refusal-text">
         {title}
       </h1>
       <div className="card narrow">
-        <p className="refusal">
+        <p id="refusal-text" className="refusal">
           Only the team lead can open this page.
           {project.lead ? ` ${project.lead.name} is the team lead for this project.` : ''}
         </p>

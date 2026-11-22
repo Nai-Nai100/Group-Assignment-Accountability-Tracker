@@ -1,6 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Dashboard from './Dashboard.jsx';
 import Invite from './Invite.jsx';
+
+// A full-page message whose heading takes focus, like every other screen (WCAG 2.4.3).
+function Message({ title, children }) {
+  const headingRef = useRef(null);
+  useEffect(() => headingRef.current.focus(), []);
+  return (
+    <main className="page">
+      <h1 ref={headingRef} tabIndex={-1}>
+        {title}
+      </h1>
+      {children}
+    </main>
+  );
+}
 
 // Loads one project the user belongs to and shows one of its screens (#/projects/:id/<screen>).
 // The server returns only this project's data, and 404 for a project the user isn't in (RC-03).
@@ -22,12 +36,11 @@ export default function ProjectPage({ token, projectId, screen, onSignOut }) {
   let content;
   if (error) {
     content = (
-      <main className="page">
-        <h1>Project unavailable</h1>
+      <Message title="Project unavailable">
         <p role="alert" className="error">
           Error: {error}
         </p>
-      </main>
+      </Message>
     );
   } else if (!project) {
     content = (
@@ -41,19 +54,20 @@ export default function ProjectPage({ token, projectId, screen, onSignOut }) {
     content = <Invite token={token} project={project} onSignOut={onSignOut} />;
   } else {
     content = (
-      <main className="page">
-        <h1>Page not found</h1>
+      <Message title="Page not found">
         <p>
           <a href={`#/projects/${project.id}`}>Go to the team dashboard</a>
         </p>
-      </main>
+      </Message>
     );
   }
 
   return (
     <>
       <nav className="crumbs" aria-label="Breadcrumb">
-        <a href="#/">← Your projects</a>
+        <a href="#/">
+          <span aria-hidden="true">← </span>Your projects
+        </a>
         {project && screen !== '' && (
           <>
             {' / '}
