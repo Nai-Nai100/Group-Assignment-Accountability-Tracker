@@ -78,7 +78,7 @@ describe('team dashboard (A5 lead, B5 member)', () => {
     fireEvent.click(await screen.findByRole('link', { name: 'Open project: Transit study' }));
 
     const h1 = await heading('Transit study');
-    expect(h1).toHaveFocus();
+    await waitFor(() => expect(h1).toHaveFocus());
     expect(screen.getByText(/Your role on this project:/)).toHaveTextContent('Your role on this project: Team lead');
     const team = screen.getByRole('region', { name: 'Team' });
     expect([...team.querySelectorAll('li')].map((li) => li.textContent)).toEqual([

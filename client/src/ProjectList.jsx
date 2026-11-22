@@ -80,10 +80,19 @@ export default function ProjectList({ token, onSignOut, onCreate, onChanged, use
             <li key={p.id}>
               <article className="card project-card" aria-labelledby={`project-${p.id}`}>
                 <div className="card-top">
-                  <span className="course">{p.course}</span>
+                  {p.course && <span className="course">{p.course}</span>}
                   <span className={`chip ${p.role}`}>{ROLE_LABELS[p.role]}</span>
                 </div>
                 <h2 id={`project-${p.id}`}>{p.name}</h2>
+                {/* Milestones and tasks aren't built yet, so these show the prototype's empty states. */}
+                <div className="meta">
+                  <p>Next milestone: No milestones yet</p>
+                  <p>Your open tasks: Allocation not accepted yet</p>
+                  <p>
+                    {p.lead && `Team lead: ${p.lead.name} · `}
+                    {p.memberCount} {p.memberCount === 1 ? 'member' : 'members'}
+                  </p>
+                </div>
                 <a className="button" href={`#/projects/${p.id}`} aria-label={`Open project: ${p.name}`}>
                   Open project
                 </a>

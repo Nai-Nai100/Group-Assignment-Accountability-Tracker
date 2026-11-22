@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import App from './App.jsx';
 
 const json = (status, body) => Promise.resolve({ ok: status >= 200 && status < 300, status, json: async () => body });
 
 const PROJECTS = {
   projects: [
-    { id: '1', name: 'Transit study', course: 'ENV 215', role: 'lead' },
-    { id: '2', name: 'Bridge report', role: 'member' },
+    { id: '1', name: 'Transit study', course: 'ENV 215', role: 'lead', lead: { name: 'Priya Shah' }, memberCount: 4 },
+    { id: '2', name: 'Bridge report', role: 'member', lead: { name: 'Omar Haddad' }, memberCount: 1 },
   ],
 };
 const team = (id, name, role, lead) => ({
@@ -108,6 +108,45 @@ describe('create project (A3)', () => {
 });
 
 describe('project list', () => {
+  test('each card shows course (only when set), role chip, name, milestone and task empty states, and the team', async () => {
+    stubApi();
+    render(<App />);
+    const card = (name) => within(screen.getByRole('article', { name }));
+    await screen.findByRole('article', { name: 'Transit study' });
+
+    const transit = card('Transit study');
+    expect(transit.getByText('ENV 215')).toBeInTheDocument();
+    expect(transit.getByText('Team lead', { selector: '.chip' })).toBeInTheDocument();
+    expect(transit.getByText('Next milestone: No milestones yet')).toBeInTheDocument();
+    expect(transit.getByText('Your open tasks: Allocation not accepted yet')).toBeInTheDocument();
+    expect(transit.getByText('Team lead: Priya Shah · 4 members')).toBeInTheDocument();
+    expect(transit.getByRole('link', { name: 'Open project: Transit study' })).toBeInTheDocument();
+
+    const bridge = card('Bridge report');
+    expect(screen.getByRole('article', { name: 'Bridge report' }).querySelector('.course')).toBeNull();
+    expect(bridge.getByText('Team member', { selector: '.chip' })).toBeInTheDocument();
+    expect(bridge.getByText('Team lead: Omar Haddad · 1 member')).toBeInTheDocument();
+  });
+
+  test('a project with no lead shows only the team size', async () => {
+    stubApi({
+      'GET /api/projects': () => json(200, { projects: [{ id: '3', name: 'Orphan', role: 'member', lead: null, memberCount: 2 }] }),
+    });
+    render(<App />);
+    const card = within(await screen.findByRole('article', { name: 'Orphan' }));
+    expect(card.getByText('2 members')).toBeInTheDocument();
+    expect(card.queryByText(/Team lead:/)).toBeNull();
+  });
+
+  test('the create card is in the same list as the project cards', async () => {
+    stubApi();
+    render(<App />);
+    const create = await screen.findByRole('button', { name: /^\+ Create a new project/ });
+    const items = within(create.closest('ul')).getAllByRole('listitem');
+    expect(items).toHaveLength(3);
+    expect(items[2]).toContainElement(create);
+  });
+
   test('each row links to its dashboard with the role and course; invite lives on the dashboard, not the list', async () => {
     stubApi();
     render(<App />);
