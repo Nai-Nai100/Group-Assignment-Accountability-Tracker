@@ -4,8 +4,10 @@ import ProjectList from './ProjectList.jsx';
 import CreateProject from './CreateProject.jsx';
 import ProjectPage from './ProjectPage.jsx';
 import JoinTeam from './JoinTeam.jsx';
+import Shell from './Shell.jsx';
 
 const TOKEN_KEY = 'token';
+const NAME_KEY = 'userName'; // shown in the top bar; not a secret
 
 function readToken() {
   try {
@@ -15,10 +17,20 @@ function readToken() {
   }
 }
 
-function writeToken(token) {
+function readName() {
+  try {
+    return sessionStorage.getItem(NAME_KEY) || '';
+  } catch {
+    return '';
+  }
+}
+
+function writeToken(token, name = '') {
   try {
     if (token) sessionStorage.setItem(TOKEN_KEY, token);
     else sessionStorage.removeItem(TOKEN_KEY);
+    if (name) sessionStorage.setItem(NAME_KEY, name);
+    else sessionStorage.removeItem(NAME_KEY);
   } catch {
     // Storage unavailable: the session lasts until the page is closed.
   }
@@ -41,6 +53,8 @@ export default function App() {
   const [token, setToken] = useState(readToken);
   const [route, setRoute] = useState(readRoute);
   const [notice, setNotice] = useState('');
+  const [userName, setUserName] = useState(readName);
+  const [projectCount, setProjectCount] = useState(null);
 
   useEffect(() => {
     const onChange = () => {
@@ -52,24 +66,42 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onChange);
   }, []);
 
-  const signIn = useCallback((t) => {
-    writeToken(t);
+  const signIn = useCallback((t, user) => {
+    writeToken(t, user?.name);
+    setUserName(user?.name || '');
     setToken(t);
   }, []);
   const signOut = useCallback(() => {
     writeToken(null);
     setToken(null);
+    setUserName('');
+    setProjectCount(null);
     setNotice('');
     go('/');
   }, []);
+
+  // Number of projects for the top bar and sidebar; refreshed on every screen change and after joining.
+  const [countVersion, setCountVersion] = useState(0);
+  const refreshCount = useCallback(() => setCountVersion((n) => n + 1), []);
+  useEffect(() => {
+    if (!token) return;
+    let live = true;
+    fetch('/api/projects', { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => live && data && setProjectCount(data.projects.length))
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [token, route, countVersion]);
 
   if (!token) {
     if (route.name === 'join') {
       return (
         <JoinTeam
-          onJoined={(t, message) => {
+          onJoined={(t, message, user) => {
             setNotice(message);
-            signIn(t);
+            signIn(t, user);
             go('/');
           }}
           onBack={() => go('/')}
@@ -78,18 +110,39 @@ export default function App() {
     }
     return <SignIn onSignedIn={signIn} onJoin={() => go('/join')} />;
   }
-  if (route.name === 'new') {
+  if (route.name === 'project') {
     return (
-      <CreateProject
+      <ProjectPage
+        key={route.projectId}
         token={token}
-        onCreated={(project) => go(`/projects/${project.id}/invite`)}
-        onCancel={() => go('/')}
+        projectId={route.projectId}
+        screen={route.screen}
         onSignOut={signOut}
+        userName={userName}
+        projectCount={projectCount}
       />
     );
   }
-  if (route.name === 'project') {
-    return <ProjectPage key={route.projectId} token={token} projectId={route.projectId} screen={route.screen} onSignOut={signOut} />;
-  }
-  return <ProjectList token={token} onSignOut={signOut} onCreate={() => go('/new')} notice={notice} />;
+  // Your projects and Create a project have the top bar but no sidebar.
+  return (
+    <Shell title="Your projects" userName={userName} projectCount={projectCount} onSignOut={signOut}>
+      {route.name === 'new' ? (
+        <CreateProject
+          token={token}
+          onCreated={(project) => go(`/projects/${project.id}/invite`)}
+          onCancel={() => go('/')}
+          onSignOut={signOut}
+        />
+      ) : (
+        <ProjectList
+          token={token}
+          onSignOut={signOut}
+          onCreate={() => go('/new')}
+          onChanged={refreshCount}
+          userName={userName}
+          notice={notice}
+        />
+      )}
+    </Shell>
+  );
 }

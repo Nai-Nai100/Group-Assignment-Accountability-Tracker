@@ -26,7 +26,7 @@ export default function SignIn({ onSignedIn, onJoin }) {
         setError(data.error || 'Sign in failed.');
         return;
       }
-      onSignedIn(data.token);
+      onSignedIn(data.token, data.user);
     } catch {
       setError('Could not reach the server. Try again.');
     } finally {
