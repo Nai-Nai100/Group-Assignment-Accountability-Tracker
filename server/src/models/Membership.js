@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-require('./Project'); // registers the model that listUserProjects populates
+require('./Project'); // registers the models that listUserProjects and the team list populate
+require('./User');
 
 // Exactly two per-project roles; there is no global/admin role (DD-05).
 const ROLES = ['lead', 'member'];
@@ -15,7 +16,7 @@ membershipSchema.index({ userId: 1, projectId: 1 }, { unique: true });
 
 // Lists the user's projects with the role held on each (US-14).
 membershipSchema.statics.listUserProjects = async function listUserProjects(userId) {
-  const memberships = await this.find({ userId }).populate('projectId', 'name createdBy').lean();
+  const memberships = await this.find({ userId }).populate('projectId', 'name course createdBy').lean();
   return memberships
     .filter((m) => m.projectId)
     .map((m) => ({ project: m.projectId, role: m.role }));

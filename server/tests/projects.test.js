@@ -70,7 +70,7 @@ describe('POST /api/projects', () => {
     expect(m.role).toBe('lead');
 
     const list = await request(app).get('/api/projects').set('Authorization', bearer(priya));
-    expect(list.body.projects).toContainEqual({ id: project.id, name: 'Transit study', role: 'lead' });
+    expect(list.body.projects).toContainEqual({ id: project.id, name: 'Transit study', course: 'ENV 215', role: 'lead' });
   });
 
   test('no token returns 401 and creates nothing', async () => {

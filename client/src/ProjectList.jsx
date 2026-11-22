@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 
-const ROLE_LABELS = { lead: 'Team lead', member: 'Team member' };
+import { ROLE_LABELS } from './Dashboard.jsx';
 
-// Landing page after sign-in (US-01), with joining by code (frames B2, B4). The full project list is built in TMP-07.
-// `notice` is a message to announce on arrival, e.g. after joining from the signed-out D7 screen.
-export default function ProjectList({ token, onSignOut, onCreate, onInvite, notice = '' }) {
+// Frame A2: every project the user is on, with the role held on each (US-14, D4), plus joining by code (B2, B4).
+// Each project name opens its team dashboard. `notice` is announced on arrival, e.g. after a D7 join.
+export default function ProjectList({ token, onSignOut, onCreate, notice = '' }) {
   const [projects, setProjects] = useState(null);
   const [error, setError] = useState('');
   const [reload, setReload] = useState(0);
@@ -69,15 +69,13 @@ export default function ProjectList({ token, onSignOut, onCreate, onInvite, noti
       {projects === null && !error && <p role="status">Loading your projects…</p>}
       {projects?.length === 0 && <p>You are not in any projects yet. Join with a code, or create a project.</p>}
       {projects?.length > 0 && (
-        <ul>
+        <ul className="plain project-cards">
           {projects.map((p) => (
-            <li key={p.id}>
-              {p.name} — {ROLE_LABELS[p.role]}{' '}
-              {p.role === 'lead' && (
-                <button type="button" className="secondary" onClick={() => onInvite(p)} aria-label={`Invite team members to ${p.name}`}>
-                  Invite team members
-                </button>
-              )}
+            <li key={p.id} className="card">
+              <span>
+                <a href={`#/projects/${p.id}`}>{p.name}</a> — {ROLE_LABELS[p.role]}
+              </span>
+              {p.course && <span className="note">{p.course}</span>}
             </li>
           ))}
         </ul>

@@ -24,8 +24,12 @@ function stubApi(overrides = {}) {
 
 const callTo = (fetchMock, url, method) => fetchMock.mock.calls.find(([u, o]) => u === url && o?.method === method);
 
+beforeEach(() => {
+  window.location.hash = '';
+});
 afterEach(() => {
   cleanup();
+  window.location.hash = '';
   vi.unstubAllGlobals();
   sessionStorage.clear();
 });
@@ -35,9 +39,10 @@ describe('signed-out join (D7)', () => {
 
   beforeEach(() => sessionStorage.clear());
 
-  function openJoin() {
+  async function openJoin() {
     render(<App />);
     fireEvent.click(screen.getByRole('button', { name: 'Have a join code? Join your team' }));
+    await screen.findByRole('heading', { name: 'Join your team' });
   }
 
   function submitJoin() {
@@ -48,8 +53,8 @@ describe('signed-out join (D7)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Join team' }));
   }
 
-  test('the sign-in link opens D7 with labeled, required inputs', () => {
-    openJoin();
+  test('the sign-in link opens D7 with labeled, required inputs', async () => {
+    await openJoin();
     expect(screen.getByRole('heading', { name: 'Join your team' })).toBeInTheDocument();
     expect(screen.getByLabelText('Join code')).toBeRequired();
     expect(screen.getByLabelText('Full name')).toBeRequired();
@@ -59,7 +64,7 @@ describe('signed-out join (D7)', () => {
 
   test('submitting posts without a token, signs in, and announces the join on the project list', async () => {
     const fetchMock = stubApi({ 'GET /api/projects': () => json(200, AFTER_JOIN) });
-    openJoin();
+    await openJoin();
     submitJoin();
 
     expect(await screen.findByRole('heading', { name: 'Your projects' })).toBeInTheDocument();
@@ -75,17 +80,17 @@ describe('signed-out join (D7)', () => {
 
   test('a server error shows in an alert and stays on D7', async () => {
     stubApi({ 'POST /api/auth/join': () => json(401, { error: 'Email or password is incorrect.' }) });
-    openJoin();
+    await openJoin();
     submitJoin();
     expect(await screen.findByRole('alert')).toHaveTextContent('Email or password is incorrect.');
     expect(screen.getByRole('heading', { name: 'Join your team' })).toBeInTheDocument();
     expect(sessionStorage.getItem('token')).toBeNull();
   });
 
-  test('"Already have an account? Sign in" returns to sign-in', () => {
-    openJoin();
+  test('"Already have an account? Sign in" returns to sign-in', async () => {
+    await openJoin();
     fireEvent.click(screen.getByRole('button', { name: 'Already have an account? Sign in' }));
-    expect(screen.getByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
   });
 });
 
@@ -97,7 +102,7 @@ describe('join from the project list (B2, B4)', () => {
 
   async function submitCode(code = '482913') {
     render(<App />);
-    await screen.findByText(/Transit study/);
+    await screen.findByRole('link', { name: 'Transit study' });
     fireEvent.change(screen.getByLabelText('Join a project with a code'), { target: { value: code } });
     fireEvent.click(screen.getByRole('button', { name: 'Join' }));
   }
@@ -108,7 +113,8 @@ describe('join from the project list (B2, B4)', () => {
     await submitCode();
 
     expect(await screen.findByText(NOTICE)).toHaveAttribute('role', 'status');
-    expect(await screen.findByText(/Bridge report.*Team member/)).toBeInTheDocument();
+    const link = await screen.findByRole('link', { name: 'Bridge report' });
+    expect(link.closest('li')).toHaveTextContent('Bridge report — Team member');
     expect(lists).toBe(2);
 
     const [, opts] = callTo(fetchMock, '/api/projects/join', 'POST');
