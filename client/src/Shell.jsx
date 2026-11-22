@@ -1,8 +1,18 @@
-import { useState } from 'react';
-import { currentTheme, saveTheme } from './theme.js';
+import { useEffect, useState } from 'react';
+import { currentTheme, savedTheme, saveTheme } from './theme.js';
 
 function ThemeToggle() {
   const [theme, setTheme] = useState(currentTheme);
+  // Until the user picks a theme, keep the label in step with the system setting.
+  useEffect(() => {
+    const media = window.matchMedia?.('(prefers-color-scheme: dark)');
+    if (!media?.addEventListener) return undefined;
+    const onChange = () => {
+      if (!savedTheme()) setTheme(currentTheme());
+    };
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
   const next = theme === 'dark' ? 'light' : 'dark';
   return (
     <button

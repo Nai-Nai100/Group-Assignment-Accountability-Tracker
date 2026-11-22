@@ -574,3 +574,31 @@ button.new-project .big {
 button.new-project .note {
   font-size: 14px;
 }
+
+/* Accessibility fixes (#56 review). */
+a.nav-item[aria-current='page'] {
+  box-shadow: inset 3px 0 0 var(--accent-border); /* a cue besides the fill colour */
+}
+
+@media (max-width: 600px) {
+  .sidebar {
+    flex-basis: 100%;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+.project-card h2,
+.topbar-user .name {
+  overflow-wrap: anywhere;
+}
+
+.topbar-user .who {
+  min-width: 0;
+}
+
+.sr-only {
+  margin: -1px;
+  padding: 0;
+  border: 0;
+}
