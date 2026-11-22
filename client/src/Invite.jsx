@@ -1,19 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
+import Refused from './Refused.jsx';
 
-// Frame A4. Only the project's team lead can see the join code (DD-08); the server enforces this.
-export default function Invite({ token, project, onBack, onSignOut }) {
+// Frame A4. Only the project's team lead can see the join code (DD-08). Nothing of the screen is shown
+// until the server answers; a 403 shows the D6 refusal instead (RC-02).
+export default function Invite({ token, project, onSignOut }) {
   const [code, setCode] = useState(null);
+  const [refused, setRefused] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState('');
   const headingRef = useRef(null);
 
-  useEffect(() => headingRef.current.focus(), []);
+  const loaded = Boolean(code || error);
+  useEffect(() => {
+    if (loaded) headingRef.current.focus();
+  }, [loaded]);
 
   useEffect(() => {
     fetch(`/api/projects/${project.id}/join-code`, { headers: { Authorization: `Bearer ${token}` } })
       .then(async (res) => {
         if (res.status === 401) return onSignOut();
-        if (res.status === 403) throw new Error('Only the team lead can see the join code.');
+        if (res.status === 403) return setRefused(true);
         if (!res.ok) throw new Error('Could not load the join code.');
         const { joinCode } = await res.json();
         if (!joinCode) throw new Error('This project has no join code.');
@@ -34,6 +40,15 @@ export default function Invite({ token, project, onBack, onSignOut }) {
     }
   }
 
+  if (refused) return <Refused title="Invite team members" project={project} />;
+  if (!loaded) {
+    return (
+      <main className="page">
+        <p role="status">Loading…</p>
+      </main>
+    );
+  }
+
   return (
     <main className="page">
       <div className="eyebrow">Project setup · team lead</div>
@@ -49,7 +64,6 @@ export default function Invite({ token, project, onBack, onSignOut }) {
           Error: {error}
         </p>
       )}
-      {code === null && !error && <p role="status">Loading the join code…</p>}
       {code && (
         <div className="card code-card">
           <div>
@@ -68,9 +82,9 @@ export default function Invite({ token, project, onBack, onSignOut }) {
       <p role="status" className="note">
         {copied}
       </p>
-      <button type="button" className="secondary" onClick={onBack}>
-        Back to your projects
-      </button>
+      <p>
+        <a href={`#/projects/${project.id}`}>Back to the team dashboard</a>
+      </p>
     </main>
   );
 }

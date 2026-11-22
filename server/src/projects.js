@@ -15,7 +15,7 @@ function projectsRouter(jwtSecret) {
   router.get('/', auth, async (req, res, next) => {
     try {
       const list = await Membership.listUserProjects(req.userId);
-      res.json({ projects: list.map(({ project, role }) => ({ id: project._id, name: project.name, role })) });
+      res.json({ projects: list.map(({ project, role }) => ({ id: project._id, name: project.name, course: project.course, role })) });
     } catch (err) {
       next(err);
     }
@@ -50,6 +50,35 @@ function projectsRouter(jwtSecret) {
       if (!project) return;
       if (!(await addMember(req.userId, project._id))) return res.status(409).json({ error: alreadyOn(project) });
       res.status(201).json({ project: joinedProject(project) });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // One project the caller is on: its name, the caller's role, and the team (names and roles only, no emails).
+  // Feeds the team dashboard (A5/B5) and the D6 refusal, which names the lead (US-14, RC-03).
+  router.get('/:projectId', auth, requireMember, async (req, res, next) => {
+    try {
+      const [project, memberships] = await Promise.all([
+        Project.findById(req.projectId).lean(),
+        Membership.find({ projectId: req.projectId }).populate('userId', 'name').lean(),
+      ]);
+      if (!project) return res.status(404).json({ error: 'Not found.' });
+      const members = memberships
+        .filter((m) => m.userId)
+        .map((m) => ({ id: m.userId._id, name: m.userId.name, role: m.role }))
+        .sort((a, b) => (a.role === b.role ? a.name.localeCompare(b.name) : a.role === 'lead' ? -1 : 1));
+      const lead = members.find((m) => m.role === 'lead');
+      res.json({
+        project: {
+          id: project._id,
+          name: project.name,
+          course: project.course,
+          role: req.role,
+          lead: lead ? { name: lead.name } : null,
+          members,
+        },
+      });
     } catch (err) {
       next(err);
     }
