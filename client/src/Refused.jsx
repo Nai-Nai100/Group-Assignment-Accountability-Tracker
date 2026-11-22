@@ -14,7 +14,8 @@ export default function Refused({ title, project }) {
       </h1>
       <div className="card narrow">
         <p className="refusal">
-          Only the team lead can open this page. {project.lead.name} is the team lead for this project.
+          Only the team lead can open this page.
+          {project.lead ? ` ${project.lead.name} is the team lead for this project.` : ''}
         </p>
         <p>
           <a href={`#/projects/${project.id}`}>Back to the team dashboard</a>
