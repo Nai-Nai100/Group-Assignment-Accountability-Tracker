@@ -33,8 +33,8 @@ function stubApi(overrides = {}) {
 
 async function openCreate() {
   render(<App />);
-  await screen.findByRole('link', { name: 'Transit study' });
-  fireEvent.click(screen.getByRole('button', { name: 'Create a project' }));
+  await screen.findByRole('link', { name: 'Open project: Transit study' });
+  fireEvent.click(screen.getByRole('button', { name: /^\+ Create a new project/ }));
   await screen.findByRole('heading', { name: 'Create a project' });
 }
 
@@ -111,12 +111,12 @@ describe('project list', () => {
   test('each row links to its dashboard with the role and course; invite lives on the dashboard, not the list', async () => {
     stubApi();
     render(<App />);
-    const lead = await screen.findByRole('link', { name: 'Transit study' });
-    const member = screen.getByRole('link', { name: 'Bridge report' });
+    const lead = await screen.findByRole('link', { name: 'Open project: Transit study' });
+    const member = screen.getByRole('link', { name: 'Open project: Bridge report' });
     expect(lead).toHaveAttribute('href', '#/projects/1');
     expect(member).toHaveAttribute('href', '#/projects/2');
-    expect(lead.closest('li')).toHaveTextContent('Transit study — Team leadENV 215');
-    expect(member.closest('li')).toHaveTextContent('Bridge report — Team member');
+    expect(screen.getByRole('article', { name: 'Transit study' })).toHaveTextContent(/ENV 215.*Team lead.*Transit study/);
+    expect(screen.getByRole('article', { name: 'Bridge report' })).toHaveTextContent(/Team member.*Bridge report/);
     expect(screen.queryByRole('button', { name: /Invite team members/ })).toBeNull();
   });
 });

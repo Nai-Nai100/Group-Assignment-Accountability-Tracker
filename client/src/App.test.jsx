@@ -12,8 +12,8 @@ function fillAndSubmit() {
   fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 }
 
-// The list row's text: the project name is a link, followed by " — <role>".
-const rowText = (name) => screen.getByRole('link', { name }).closest('li').textContent;
+// The A2 card's text: course, role chip and project name.
+const cardText = (name) => screen.getByRole('article', { name }).textContent;
 
 beforeEach(() => {
   sessionStorage.clear();
@@ -41,16 +41,17 @@ describe('sign-in screen', () => {
     fillAndSubmit();
 
     expect(await screen.findByRole('heading', { name: 'Your projects' })).toBeInTheDocument();
-    await screen.findByRole('link', { name: 'Transit study' });
-    expect(rowText('Transit study')).toContain('Transit study — Team lead');
-    expect(rowText('Bridge report')).toContain('Bridge report — Team member');
+    await screen.findByRole('link', { name: 'Open project: Transit study' });
+    expect(cardText('Transit study')).toContain('Team lead');
+    expect(cardText('Bridge report')).toContain('Team member');
     expect(sessionStorage.getItem('token')).toBe('tok123');
 
     const [url, opts] = fetchMock.mock.calls[0];
     expect(url).toBe('/api/auth/signin');
     expect(opts.method).toBe('POST');
     expect(JSON.parse(opts.body)).toEqual({ email: 'priya@university.edu', password: 'secret-pass' });
-    expect(fetchMock.mock.calls[1][1].headers.Authorization).toBe('Bearer tok123');
+    const list = fetchMock.mock.calls.find(([u]) => u === '/api/projects');
+    expect(list[1].headers.Authorization).toBe('Bearer tok123');
   });
 
   test('401 shows the server error in an alert', async () => {
@@ -90,7 +91,7 @@ describe('signed in', () => {
     sessionStorage.setItem('token', 'tok123');
     vi.stubGlobal('fetch', vi.fn(() => json(200, PROJECTS)));
     render(<App />);
-    await screen.findByRole('link', { name: 'Transit study' });
+    await screen.findByRole('link', { name: 'Open project: Transit study' });
     fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
     expect(await screen.findByRole('button', { name: 'Sign in' })).toBeInTheDocument();
     expect(sessionStorage.getItem('token')).toBeNull();

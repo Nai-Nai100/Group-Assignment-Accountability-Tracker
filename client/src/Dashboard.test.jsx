@@ -75,7 +75,7 @@ describe('team dashboard (A5 lead, B5 member)', () => {
   test('opening a project from the list shows its name, role text and team, and focuses the h1', async () => {
     stubApi();
     render(<App />);
-    fireEvent.click(await screen.findByRole('link', { name: 'Transit study' }));
+    fireEvent.click(await screen.findByRole('link', { name: 'Open project: Transit study' }));
 
     const h1 = await heading('Transit study');
     expect(h1).toHaveFocus();
@@ -105,11 +105,11 @@ describe('team dashboard (A5 lead, B5 member)', () => {
     expect(screen.queryByRole('link', { name: 'Invite team members' })).toBeNull();
   });
 
-  test('the "Your projects" breadcrumb goes back to the list', async () => {
+  test('the sidebar "My projects" link goes back to the list', async () => {
     stubApi();
     openAt('#/projects/1');
     await heading('Transit study');
-    fireEvent.click(screen.getByRole('link', { name: 'Your projects' }));
+    fireEvent.click(screen.getByRole('link', { name: /^My projects/ }));
     expect(await heading('Your projects')).toBeInTheDocument();
   });
 

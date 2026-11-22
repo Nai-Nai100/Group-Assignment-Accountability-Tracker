@@ -102,20 +102,23 @@ describe('join from the project list (B2, B4)', () => {
 
   async function submitCode(code = '482913') {
     render(<App />);
-    await screen.findByRole('link', { name: 'Transit study' });
+    await screen.findByRole('link', { name: 'Open project: Transit study' });
     fireEvent.change(screen.getByLabelText('Join a project with a code'), { target: { value: code } });
     fireEvent.click(screen.getByRole('button', { name: 'Join' }));
   }
 
   test('posts {code} with a Bearer token, announces the join, and reloads the list', async () => {
-    let lists = 0;
-    const fetchMock = stubApi({ 'GET /api/projects': () => json(200, lists++ ? AFTER_JOIN : PROJECTS) });
+    // The list returns the new project only once the join has been posted.
+    let joined = false;
+    const fetchMock = stubApi({
+      'GET /api/projects': () => json(200, joined ? AFTER_JOIN : PROJECTS),
+      'POST /api/projects/join': () => ((joined = true), json(201, JOINED)),
+    });
     await submitCode();
 
     expect(await screen.findByText(NOTICE)).toHaveAttribute('role', 'status');
-    const link = await screen.findByRole('link', { name: 'Bridge report' });
-    expect(link.closest('li')).toHaveTextContent('Bridge report — Team member');
-    expect(lists).toBe(2);
+    await screen.findByRole('link', { name: 'Open project: Bridge report' });
+    expect(screen.getByRole('article', { name: 'Bridge report' })).toHaveTextContent('Team member');
 
     const [, opts] = callTo(fetchMock, '/api/projects/join', 'POST');
     expect(opts.headers.Authorization).toBe('Bearer tok123');
