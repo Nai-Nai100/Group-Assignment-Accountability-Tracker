@@ -58,6 +58,23 @@ const joinCode = (id, auth) => {
   return auth ? req.set('Authorization', auth) : req;
 };
 
+describe('GET /api/projects', () => {
+  test("each card gets the lead's name and team size, and no emails", async () => {
+    const res = await request(app).get('/api/projects').set('Authorization', bearer(priya));
+    expect(res.status).toBe(200);
+    expect(res.body.projects).toEqual([
+      { id: projB.id, name: 'B', role: 'member', lead: { name: 'Omar' }, memberCount: 2 },
+    ]);
+    expect(JSON.stringify(res.body)).not.toMatch(/@/);
+  });
+
+  test('no token returns 401', async () => {
+    const res = await request(app).get('/api/projects');
+    expect(res.status).toBe(401);
+    expect(res.body.projects).toBeUndefined();
+  });
+});
+
 describe('POST /api/projects', () => {
   test('creator becomes lead, gets a 6-digit code, and sees the project as lead', async () => {
     const res = await create({ name: 'Transit study', course: 'ENV 215' }, bearer(priya));
@@ -70,7 +87,14 @@ describe('POST /api/projects', () => {
     expect(m.role).toBe('lead');
 
     const list = await request(app).get('/api/projects').set('Authorization', bearer(priya));
-    expect(list.body.projects).toContainEqual({ id: project.id, name: 'Transit study', course: 'ENV 215', role: 'lead' });
+    expect(list.body.projects).toContainEqual({
+      id: project.id,
+      name: 'Transit study',
+      course: 'ENV 215',
+      role: 'lead',
+      lead: { name: 'Priya' },
+      memberCount: 1,
+    });
   });
 
   test('no token returns 401 and creates nothing', async () => {

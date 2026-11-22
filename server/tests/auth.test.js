@@ -174,6 +174,6 @@ describe('GET /api/projects scope', () => {
     expect(ids).toEqual([projA.id, projB.id].sort());
     expect(ids).not.toContain(projC.id);
     expect(JSON.stringify(res.body)).not.toMatch(/joinCode|CODE[ABC]1/);
-    for (const p of res.body.projects) expect(Object.keys(p).sort()).toEqual(['id', 'name', 'role']);
+    for (const p of res.body.projects) expect(Object.keys(p).sort()).toEqual(['id', 'lead', 'memberCount', 'name', 'role']);
   });
 });
