@@ -64,7 +64,8 @@ describe('sign-in screen', () => {
     render(<App />);
     expect(screen.queryByRole('link', { name: /sign.?up|register|create account/i })).toBeNull();
     expect(screen.queryByRole('button', { name: /sign.?up|register|create account/i })).toBeNull();
-    expect(screen.getAllByRole('button')).toHaveLength(1);
+    // The only other way in is joining with a code from a team lead (RC-01, frame D7).
+    expect(screen.getAllByRole('button').map((b) => b.textContent)).toEqual(['Sign in', 'Have a join code? Join your team →']);
   });
 });
 
