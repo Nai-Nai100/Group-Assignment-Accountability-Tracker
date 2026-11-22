@@ -12,9 +12,16 @@ function fillAndSubmit() {
   fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 }
 
-beforeEach(() => sessionStorage.clear());
+// The list row's text: the project name is a link, followed by " — <role>".
+const rowText = (name) => screen.getByRole('link', { name }).closest('li').textContent;
+
+beforeEach(() => {
+  sessionStorage.clear();
+  window.location.hash = '';
+});
 afterEach(() => {
   cleanup();
+  window.location.hash = '';
   vi.unstubAllGlobals();
   sessionStorage.clear();
 });
@@ -34,8 +41,9 @@ describe('sign-in screen', () => {
     fillAndSubmit();
 
     expect(await screen.findByRole('heading', { name: 'Your projects' })).toBeInTheDocument();
-    expect(await screen.findByText(/Transit study.*Team lead/)).toBeInTheDocument();
-    expect(screen.getByText(/Bridge report.*Team member/)).toBeInTheDocument();
+    await screen.findByRole('link', { name: 'Transit study' });
+    expect(rowText('Transit study')).toContain('Transit study — Team lead');
+    expect(rowText('Bridge report')).toContain('Bridge report — Team member');
     expect(sessionStorage.getItem('token')).toBe('tok123');
 
     const [url, opts] = fetchMock.mock.calls[0];
@@ -82,9 +90,9 @@ describe('signed in', () => {
     sessionStorage.setItem('token', 'tok123');
     vi.stubGlobal('fetch', vi.fn(() => json(200, PROJECTS)));
     render(<App />);
-    await screen.findByText(/Transit study/);
+    await screen.findByRole('link', { name: 'Transit study' });
     fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
-    expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Sign in' })).toBeInTheDocument();
     expect(sessionStorage.getItem('token')).toBeNull();
   });
 });
