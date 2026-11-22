@@ -91,9 +91,17 @@ export default function ProjectList({ token, onSignOut, onCreate, onChanged, use
             </li>
           ))}
           <li>
-            <button type="button" className="new-project" onClick={onCreate}>
+            <button
+              type="button"
+              className="new-project"
+              onClick={onCreate}
+              aria-label="+ Create a new project"
+              aria-describedby="new-project-hint"
+            >
               <span className="big">+ Create a new project</span>
-              <span className="note">You&apos;ll be its team lead and can invite your team.</span>
+              <span id="new-project-hint" className="note">
+                You&apos;ll be its team lead and can invite your team.
+              </span>
             </button>
           </li>
         </ul>
