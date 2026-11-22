@@ -15,7 +15,25 @@ function projectsRouter(jwtSecret) {
   router.get('/', auth, async (req, res, next) => {
     try {
       const list = await Membership.listUserProjects(req.userId);
-      res.json({ projects: list.map(({ project, role }) => ({ id: project._id, name: project.name, course: project.course, role })) });
+      // Team size and lead's name for the A2 cards (names only, no emails).
+      const teams = await Membership.find({ projectId: { $in: list.map((p) => p.project._id) } })
+        .populate('userId', 'name')
+        .lean();
+      const team = (id) => teams.filter((m) => m.userId && m.projectId.equals(id));
+      res.json({
+        projects: list.map(({ project, role }) => {
+          const members = team(project._id);
+          const lead = members.find((m) => m.role === 'lead');
+          return {
+            id: project._id,
+            name: project.name,
+            course: project.course,
+            role,
+            lead: lead ? { name: lead.userId.name } : null,
+            memberCount: members.length,
+          };
+        }),
+      });
     } catch (err) {
       next(err);
     }

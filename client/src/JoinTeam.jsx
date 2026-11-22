@@ -25,7 +25,7 @@ export default function JoinTeam({ onJoined, onBack }) {
       });
       const data = await res.json();
       if (!res.ok) return setError(data.error || 'Could not join the team.');
-      onJoined(data.token, `You've joined ${data.project.name} as a team member.`);
+      onJoined(data.token, `You've joined ${data.project.name} as a team member.`, data.user);
     } catch {
       setError('Could not reach the server. Try again.');
     } finally {

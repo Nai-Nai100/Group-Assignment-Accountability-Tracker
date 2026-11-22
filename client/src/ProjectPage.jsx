@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import Dashboard from './Dashboard.jsx';
 import Invite from './Invite.jsx';
+import Shell from './Shell.jsx';
+import Sidebar from './Sidebar.jsx';
+import { ROLE_LABELS } from './Dashboard.jsx';
 
 // A full-page message whose heading takes focus, like every other screen (WCAG 2.4.3).
 function Message({ title, children }) {
@@ -18,7 +21,7 @@ function Message({ title, children }) {
 
 // Loads one project the user belongs to and shows one of its screens (#/projects/:id/<screen>).
 // The server returns only this project's data, and 404 for a project the user isn't in (RC-03).
-export default function ProjectPage({ token, projectId, screen, onSignOut }) {
+export default function ProjectPage({ token, projectId, screen, onSignOut, userName, projectCount }) {
   const [project, setProject] = useState(null);
   const [error, setError] = useState('');
 
@@ -63,19 +66,15 @@ export default function ProjectPage({ token, projectId, screen, onSignOut }) {
   }
 
   return (
-    <>
-      <nav className="crumbs" aria-label="Breadcrumb">
-        <a href="#/">
-          <span aria-hidden="true">← </span>Your projects
-        </a>
-        {project && screen !== '' && (
-          <>
-            {' / '}
-            <a href={`#/projects/${project.id}`}>{project.name}</a>
-          </>
-        )}
-      </nav>
+    <Shell
+      title={project ? project.name : 'Project'}
+      userName={userName}
+      roleLabel={project && ROLE_LABELS[project.role]}
+      projectCount={projectCount}
+      onSignOut={onSignOut}
+      sidebar={project && <Sidebar project={project} current={screen} projectCount={projectCount} />}
+    >
       {content}
-    </>
+    </Shell>
   );
 }

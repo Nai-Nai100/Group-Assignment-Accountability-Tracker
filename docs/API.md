@@ -32,10 +32,10 @@ Any protected route returns `401 { "error": "Sign in required." }` when the toke
 The signed-in user's projects with the role they hold on each.
 
 ```json
-{ "projects": [ { "id": "...", "name": "Transit study", "role": "lead" } ] }
+{ "projects": [ { "id": "...", "name": "Transit study", "course": "ENV 215", "role": "lead", "lead": { "name": "Priya" }, "memberCount": 4 } ] }
 ```
 
-`role` is `lead` or `member`. The UI shows these as "Team lead" and "Team member".
+`role` is `lead` or `member`. The UI shows these as "Team lead" and "Team member". `course` is omitted when not set. `lead` is the team lead's name only (no email), or `null`; `memberCount` counts everyone on the project, lead included.
 
 ### Unknown routes
 Any other path, including sign-up style routes such as `/api/auth/signup`, returns `404 { "error": "Not found." }`.

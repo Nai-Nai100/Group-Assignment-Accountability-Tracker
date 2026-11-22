@@ -65,7 +65,7 @@ describe('POST /api/projects/join (signed in)', () => {
     expect(res.status).toBe(201);
     expect(res.body).toEqual({ project: { id: projA.id, name: 'A', role: 'member' } });
     expect((await membership(priya, projA)).role).toBe('member');
-    expect((await list(bearer(priya))).body.projects).toEqual([{ id: projA.id, name: 'A', role: 'member' }]);
+    expect((await list(bearer(priya))).body.projects).toEqual([{ id: projA.id, name: 'A', role: 'member', lead: { name: 'Omar' }, memberCount: 2 }]);
   });
 
   test('a wrong code returns 400 and creates no membership', async () => {
@@ -184,7 +184,7 @@ describe('POST /api/auth/join (signed out)', () => {
     expect((await membership(user, projA)).role).toBe('member');
 
     const projects = await list(`Bearer ${res.body.token}`);
-    expect(projects.body.projects).toEqual([{ id: projA.id, name: 'A', role: 'member' }]);
+    expect(projects.body.projects).toEqual([{ id: projA.id, name: 'A', role: 'member', lead: { name: 'Omar' }, memberCount: 2 }]);
   });
 
   test('the new account can then sign in', async () => {

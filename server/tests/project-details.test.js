@@ -67,8 +67,8 @@ describe('GET /api/projects (D4)', () => {
     expect(res.body.projects).toHaveLength(2);
     expect(res.body.projects).toEqual(
       expect.arrayContaining([
-        { id: projA.id, name: 'Transit study', course: 'ENV 215', role: 'lead' },
-        { id: projB.id, name: 'Bridge report', role: 'member' },
+        { id: projA.id, name: 'Transit study', course: 'ENV 215', role: 'lead', lead: { name: 'Priya' }, memberCount: 2 },
+        { id: projB.id, name: 'Bridge report', role: 'member', lead: { name: 'Omar' }, memberCount: 2 },
       ]),
     );
   });

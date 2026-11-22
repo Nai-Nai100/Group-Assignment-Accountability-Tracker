@@ -4,7 +4,7 @@ import { ROLE_LABELS } from './Dashboard.jsx';
 
 // Frame A2: every project the user is on, with the role held on each (US-14, D4), plus joining by code (B2, B4).
 // Each project name opens its team dashboard. `notice` is announced on arrival, e.g. after a D7 join.
-export default function ProjectList({ token, onSignOut, onCreate, notice = '' }) {
+export default function ProjectList({ token, onSignOut, onCreate, onChanged, userName, notice = '' }) {
   const [projects, setProjects] = useState(null);
   const [error, setError] = useState('');
   const [reload, setReload] = useState(0);
@@ -46,6 +46,7 @@ export default function ProjectList({ token, onSignOut, onCreate, notice = '' })
       setCode('');
       setJoined(`You've joined ${data.project.name} as a team member.`);
       setReload((n) => n + 1);
+      onChanged?.();
     } catch {
       setJoinError('Could not reach the server. Try again.');
     } finally {
@@ -54,10 +55,15 @@ export default function ProjectList({ token, onSignOut, onCreate, notice = '' })
   }
 
   return (
-    <main>
+    <main className="page">
+      {userName && <div className="eyebrow">Signed in as {userName}</div>}
       <h1 ref={headingRef} tabIndex={-1}>
         Your projects
       </h1>
+      <p className="note">
+        You can be on several project teams at once. Your role — team lead or team member — is set separately for
+        each project.
+      </p>
       <p role="status" className="note">
         {joined}
       </p>
@@ -68,16 +74,45 @@ export default function ProjectList({ token, onSignOut, onCreate, notice = '' })
       )}
       {projects === null && !error && <p role="status">Loading your projects…</p>}
       {projects?.length === 0 && <p>You are not in any projects yet. Join with a code, or create a project.</p>}
-      {projects?.length > 0 && (
-        <ul className="plain project-cards">
+      {projects && (
+        <ul className="project-grid">
           {projects.map((p) => (
-            <li key={p.id} className="card">
-              <span>
-                <a href={`#/projects/${p.id}`}>{p.name}</a> — {ROLE_LABELS[p.role]}
-              </span>
-              {p.course && <span className="note">{p.course}</span>}
+            <li key={p.id}>
+              <article className="card project-card" aria-labelledby={`project-${p.id}`}>
+                <div className="card-top">
+                  {p.course && <span className="course">{p.course}</span>}
+                  <span className={`chip ${p.role}`}>{ROLE_LABELS[p.role]}</span>
+                </div>
+                <h2 id={`project-${p.id}`}>{p.name}</h2>
+                {/* Milestones and tasks aren't built yet, so these show the prototype's empty states. */}
+                <div className="meta">
+                  <p>Next milestone: No milestones yet</p>
+                  <p>Your open tasks: Allocation not accepted yet</p>
+                  <p>
+                    {p.lead && `Team lead: ${p.lead.name} · `}
+                    {p.memberCount} {p.memberCount === 1 ? 'member' : 'members'}
+                  </p>
+                </div>
+                <a className="button" href={`#/projects/${p.id}`} aria-label={`Open project: ${p.name}`}>
+                  Open project
+                </a>
+              </article>
             </li>
           ))}
+          <li>
+            <button
+              type="button"
+              className="new-project"
+              onClick={onCreate}
+              aria-label="+ Create a new project"
+              aria-describedby="new-project-hint"
+            >
+              <span className="big">+ Create a new project</span>
+              <span id="new-project-hint" className="note">
+                You&apos;ll be its team lead and can invite your team.
+              </span>
+            </button>
+          </li>
         </ul>
       )}
       <form className="card join-form" onSubmit={joinByCode}>
@@ -112,14 +147,6 @@ export default function ProjectList({ token, onSignOut, onCreate, notice = '' })
           </button>
         </div>
       </form>
-      <div className="actions">
-        <button type="button" onClick={onCreate}>
-          Create a project
-        </button>
-        <button type="button" className="secondary" onClick={onSignOut}>
-          Sign out
-        </button>
-      </div>
     </main>
   );
 }
